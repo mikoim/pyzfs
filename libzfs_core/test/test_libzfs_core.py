@@ -7,6 +7,7 @@ These are mostly functional and conformance tests that validate
 that the operations produce expected effects or fail with expected
 exceptions.
 """
+from __future__ import print_function
 
 import unittest
 import contextlib
@@ -27,8 +28,8 @@ from .. import exceptions as lzc_exc
 
 def _print(*args):
     for arg in args:
-        print arg,
-    print
+        print(arg, end=' ')
+    print()
 
 
 @contextlib.contextmanager
@@ -59,7 +60,7 @@ def _zfs_mount(fs):
             with suppress():
                 subprocess.check_output(unmount_cmd, stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as e:
-        print 'failed to mount %s @ %s : %s' % (fs, mntdir, e.output)
+        print('failed to mount %s @ %s : %s' % (fs, mntdir, e.output))
         raise
     finally:
         os.rmdir(mntdir)
@@ -3483,7 +3484,7 @@ class _TempPool(object):
             if 'permission denied' in e.output:
                 raise unittest.SkipTest(
                     'insufficient privileges to run libzfs_core tests')
-            print 'command failed: ', e.output
+            print('command failed: ', e.output)
             raise
         except Exception:
             self.cleanUp()
@@ -3518,7 +3519,7 @@ class _TempPool(object):
             subprocess.check_output(
                 self._zpool_create, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
-            print 'command failed: ', e.output
+            print('command failed: ', e.output)
             raise
         for fs in self._filesystems:
             lzc.lzc_create(self.makeName(fs))
