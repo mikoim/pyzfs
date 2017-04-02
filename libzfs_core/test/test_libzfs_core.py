@@ -31,6 +31,7 @@ from builtins import str
 from builtins import zip
 from past.utils import old_div
 
+from . import _bytes
 from .. import _libzfs_core as lzc
 from .. import exceptions as lzc_exc
 
@@ -160,7 +161,7 @@ def temp_file_in_fs(fs):
     with zfs_mount(fs) as mntdir:
         with tempfile.NamedTemporaryFile(dir=mntdir) as f:
             for i in range(1024):
-                f.write('x' * 1024)
+                f.write(_bytes('x' * 1024))
             f.flush()
             yield f.name
 
@@ -888,7 +889,7 @@ class ZFSTest(unittest.TestCase):
 
         lzc.lzc_snapshot([snapname])
         ret = lzc.lzc_rollback(name)
-        self.assertEqual(ret, snapname)
+        self.assertEqual(ret, _bytes(snapname))
 
     def test_rollback_2(self):
         name = ZFSTest.pool.makeName("fs1")
@@ -898,7 +899,7 @@ class ZFSTest(unittest.TestCase):
         lzc.lzc_snapshot([snapname1])
         lzc.lzc_snapshot([snapname2])
         ret = lzc.lzc_rollback(name)
-        self.assertEqual(ret, snapname2)
+        self.assertEqual(ret, _bytes(snapname2))
 
     def test_rollback_no_snaps(self):
         name = ZFSTest.pool.makeName("fs1")
@@ -1262,7 +1263,7 @@ class ZFSTest(unittest.TestCase):
         with zfs_mount(ZFSTest.pool.makeName("fs1")) as mntdir:
             with tempfile.NamedTemporaryFile(dir=mntdir) as f:
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 f.flush()
                 lzc.lzc_snapshot([snap2])
         lzc.lzc_snapshot([snap3])
@@ -1280,7 +1281,7 @@ class ZFSTest(unittest.TestCase):
         with zfs_mount(ZFSTest.pool.makeName("fs1")) as mntdir:
             with tempfile.NamedTemporaryFile(dir=mntdir) as f:
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 f.flush()
                 lzc.lzc_snapshot([snap])
 
@@ -1394,7 +1395,7 @@ class ZFSTest(unittest.TestCase):
         with zfs_mount(ZFSTest.pool.makeName("fs1")) as mntdir:
             with tempfile.NamedTemporaryFile(dir=mntdir) as f:
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 f.flush()
                 lzc.lzc_snapshot([snap2])
         lzc.lzc_snapshot([snap3])
@@ -1514,7 +1515,7 @@ class ZFSTest(unittest.TestCase):
         with zfs_mount(ZFSTest.pool.makeName("fs1")) as mntdir:
             with tempfile.NamedTemporaryFile(dir=mntdir) as f:
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 f.flush()
                 lzc.lzc_snapshot([snap])
 
@@ -1535,7 +1536,7 @@ class ZFSTest(unittest.TestCase):
         with zfs_mount(ZFSTest.pool.makeName("fs1")) as mntdir:
             with tempfile.NamedTemporaryFile(dir=mntdir) as f:
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 f.flush()
                 lzc.lzc_snapshot([snap2])
 
@@ -1751,7 +1752,7 @@ class ZFSTest(unittest.TestCase):
         with zfs_mount(ZFSTest.pool.makeName("fs1")) as mntdir:
             with tempfile.NamedTemporaryFile(dir=mntdir) as f:
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 f.flush()
                 lzc.lzc_snapshot([snap])
 
@@ -2253,7 +2254,7 @@ class ZFSTest(unittest.TestCase):
             with zfs_mount(dstfs) as mntdir:
                 f = tempfile.NamedTemporaryFile(dir=mntdir, delete=False)
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 lzc.lzc_receive(dst, stream.fileno(), force=True)
                 # The temporary file dissappears and any access, even close(),
                 # results in EIO.
@@ -2340,7 +2341,7 @@ class ZFSTest(unittest.TestCase):
             with zfs_mount(dstfs) as mntdir:
                 f = tempfile.NamedTemporaryFile(dir=mntdir, delete=False)
                 for i in range(1024):
-                    f.write('x' * 1024)
+                    f.write(_bytes('x' * 1024))
                 lzc.lzc_receive(dst2, incr.fileno(), force=True)
                 # The temporary file dissappears and any access, even close(),
                 # results in EIO.
@@ -2708,7 +2709,7 @@ class ZFSTest(unittest.TestCase):
         with cleanup_fd() as fd:
             missing = lzc.lzc_hold({snap1: 'tag', snap2: 'tag'}, fd)
         self.assertEqual(len(missing), 1)
-        self.assertEqual(missing[0], snap2)
+        self.assertEqual(missing[0], _bytes(snap2))
 
     def test_hold_many_with_all_missing(self):
         snap1 = ZFSTest.pool.getRoot().getSnap()
@@ -2717,7 +2718,7 @@ class ZFSTest(unittest.TestCase):
         with cleanup_fd() as fd:
             missing = lzc.lzc_hold({snap1: 'tag', snap2: 'tag'}, fd)
         self.assertEqual(len(missing), 2)
-        self.assertEqual(sorted(missing), sorted([snap1, snap2]))
+        self.assertEqual(sorted(missing), sorted(_bytes([snap1, snap2])))
 
     def test_hold_missing_fs(self):
         # XXX skip pre-created filesystems
@@ -2832,8 +2833,8 @@ class ZFSTest(unittest.TestCase):
 
             holds = lzc.lzc_get_holds(snap)
             self.assertEquals(len(holds), 2)
-            self.assertIn('tag1', holds)
-            self.assertIn('tag2', holds)
+            self.assertIn(_bytes('tag1'), holds)
+            self.assertIn(_bytes('tag2'), holds)
             self.assertIsInstance(holds['tag1'], (int, int))
 
     def test_get_holds_after_auto_cleanup(self):
@@ -2976,21 +2977,21 @@ class ZFSTest(unittest.TestCase):
 
         ret = lzc.lzc_release({snap: ['tag']})
         self.assertEquals(len(ret), 1)
-        self.assertEquals(ret[0], snap + '#tag')
+        self.assertEquals(ret[0], _bytes(snap + '#tag'))
 
     def test_release_hold_missing_snap(self):
         snap = ZFSTest.pool.getRoot().getSnap()
 
         ret = lzc.lzc_release({snap: ['tag']})
         self.assertEquals(len(ret), 1)
-        self.assertEquals(ret[0], snap)
+        self.assertEquals(ret[0], _bytes(snap))
 
     def test_release_hold_missing_snap_2(self):
         snap = ZFSTest.pool.getRoot().getSnap()
 
         ret = lzc.lzc_release({snap: ['tag', 'another']})
         self.assertEquals(len(ret), 1)
-        self.assertEquals(ret[0], snap)
+        self.assertEquals(ret[0], _bytes(snap))
 
     def test_release_hold_across_pools(self):
         snap1 = ZFSTest.pool.getRoot().getSnap()
@@ -3032,7 +3033,7 @@ class ZFSTest(unittest.TestCase):
             lzc.lzc_release({snap: ['tag']})
         for e in ctx.exception.errors:
             self.assertIsInstance(e, lzc_exc.NameTooLong)
-            self.assertEquals(e.name, snap)
+            self.assertEquals(e.name, _bytes(snap))
 
     def test_release_hold_invalid_snap_name(self):
         snap = ZFSTest.pool.getRoot().getSnap() + '@bad'

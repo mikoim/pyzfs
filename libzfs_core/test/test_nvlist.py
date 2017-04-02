@@ -9,9 +9,11 @@ value types or out of bounds values are detected.
 """
 from __future__ import unicode_literals
 
-from builtins import zip
 import unittest
 
+from builtins import zip
+
+from . import _bytes
 from .._nvlist import nvlist_in, nvlist_out, _lib
 from ..ctypes import (
     uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t,
@@ -69,17 +71,17 @@ class TestNVList(unittest.TestCase):
     def test_string_value(self):
         props = {"key": "value"}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_implicit_boolean_value(self):
         props = {"key": None}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_boolean_values(self):
         props = {"key1": True, "key2": False}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_explicit_boolean_true_value(self):
         props = {"key": boolean_t(1)}
@@ -104,12 +106,12 @@ class TestNVList(unittest.TestCase):
     def test_uint64_value(self):
         props = {"key": 1}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_uint64_max_value(self):
         props = {"key": 2 ** 64 - 1}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_uint64_too_large_value(self):
         props = {"key": 2 ** 64}
@@ -324,12 +326,12 @@ class TestNVList(unittest.TestCase):
     def test_nested_dict(self):
         props = {"key": {}}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_nested_nested_dict(self):
         props = {"key": {"key": {}}}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_mismatching_values_array(self):
         props = {"key": [1, "string"]}
@@ -349,12 +351,12 @@ class TestNVList(unittest.TestCase):
     def test_string_array(self):
         props = {"key": ["value", "value2"]}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_boolean_array(self):
         props = {"key": [True, False]}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_explicit_boolean_array(self):
         props = {"key": [boolean_t(False), boolean_t(True)]}
@@ -364,7 +366,7 @@ class TestNVList(unittest.TestCase):
     def test_uint64_array(self):
         props = {"key": [0, 1, 2 ** 64 - 1]}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_uint64_array_too_large_value(self):
         props = {"key": [0, 2 ** 64]}
@@ -519,7 +521,7 @@ class TestNVList(unittest.TestCase):
     def test_dict_array(self):
         props = {"key": [{"key": 1}, {"key": None}, {"key": {}}]}
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
     def test_implicit_uint32_value(self):
         props = {"rewind-request": 1}
@@ -608,7 +610,7 @@ class TestNVList(unittest.TestCase):
             "pool_context": -(2 ** 31)
         }
         res = self._dict_to_nvlist_to_dict(props)
-        self.assertEqual(props, res)
+        self.assertEqual(_bytes(props), res)
 
 
 # vim: softtabstop=4 tabstop=4 expandtab shiftwidth=4
