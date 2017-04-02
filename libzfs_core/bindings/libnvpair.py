@@ -3,6 +3,7 @@
 """
 Python bindings for ``libnvpair``.
 """
+from __future__ import unicode_literals
 
 CDEF = """
     typedef ... nvlist_t;

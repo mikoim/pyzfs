@@ -3,6 +3,7 @@
 """
 Utility functions for casting to a specific C type.
 """
+from __future__ import unicode_literals
 
 from .bindings.libnvpair import ffi as _ffi
 

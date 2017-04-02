@@ -8,7 +8,14 @@ that the operations produce expected effects or fail with expected
 exceptions.
 """
 from __future__ import print_function
+from __future__ import division
+from __future__ import unicode_literals
 
+from builtins import bytes
+from builtins import zip
+from builtins import range
+from builtins import object
+from past.utils import old_div
 import unittest
 import contextlib
 import errno
@@ -1238,11 +1245,11 @@ class ZFSTest(unittest.TestCase):
         lzc.lzc_snapshot([snap3])
 
         space = lzc.lzc_snaprange_space(snap1, snap2)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_snaprange_space(snap2, snap3)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_snaprange_space(snap1, snap3)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
 
     def test_snaprange_space_2(self):
         snap1 = ZFSTest.pool.makeName("fs1@snap1")
@@ -1364,17 +1371,17 @@ class ZFSTest(unittest.TestCase):
         lzc.lzc_snapshot([snap3])
 
         space = lzc.lzc_send_space(snap2, snap1)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_send_space(snap3, snap2)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_send_space(snap3, snap1)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_send_space(snap1)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_send_space(snap2)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
         space = lzc.lzc_send_space(snap3)
-        self.assertIsInstance(space, (int, long))
+        self.assertIsInstance(space, (int, int))
 
     def test_send_space_2(self):
         snap1 = ZFSTest.pool.makeName("fs1@snap1")
@@ -1516,7 +1523,7 @@ class ZFSTest(unittest.TestCase):
             lzc.lzc_send(snap, None, fd)
             st = os.fstat(fd)
             # 5%, arbitrary.
-            self.assertAlmostEqual(st.st_size, estimate, delta=estimate / 20)
+            self.assertAlmostEqual(st.st_size, estimate, delta=old_div(estimate, 20))
 
     def test_send_incremental(self):
         snap1 = ZFSTest.pool.makeName("fs1@snap1")
@@ -1537,7 +1544,7 @@ class ZFSTest(unittest.TestCase):
             lzc.lzc_send(snap2, snap1, fd)
             st = os.fstat(fd)
             # 5%, arbitrary.
-            self.assertAlmostEqual(st.st_size, estimate, delta=estimate / 20)
+            self.assertAlmostEqual(st.st_size, estimate, delta=old_div(estimate, 20))
 
     def test_send_flags(self):
         snap = ZFSTest.pool.makeName("fs1@snap")
@@ -2825,7 +2832,7 @@ class ZFSTest(unittest.TestCase):
             self.assertEquals(len(holds), 2)
             self.assertIn('tag1', holds)
             self.assertIn('tag2', holds)
-            self.assertIsInstance(holds['tag1'], (int, long))
+            self.assertIsInstance(holds['tag1'], (int, int))
 
     def test_get_holds_after_auto_cleanup(self):
         snap = ZFSTest.pool.getRoot().getSnap()

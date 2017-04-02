@@ -23,6 +23,7 @@ please visit its `GitHub repository <https://github.com/ClusterHQ/pyzfs>`_.
 
     Maximum length of any ZFS name.
 '''
+from __future__ import unicode_literals
 
 from ._constants import (
     MAXNAMELEN,

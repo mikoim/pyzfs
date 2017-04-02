@@ -3,6 +3,7 @@
 """
 Exceptions that can be raised by libzfs_core operations.
 """
+from __future__ import unicode_literals
 
 import errno
 

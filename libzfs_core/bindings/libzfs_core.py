@@ -3,6 +3,7 @@
 """
 Python bindings for ``libzfs_core``.
 """
+from __future__ import unicode_literals
 
 CDEF = """
     enum lzc_send_flags {

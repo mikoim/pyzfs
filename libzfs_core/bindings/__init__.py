@@ -5,7 +5,9 @@ The package that contains a module per each C library that
 `libzfs_core` uses.  The modules expose CFFI objects required
 to make calls to functions in the libraries.
 """
+from __future__ import unicode_literals
 
+from builtins import object
 import threading
 import importlib
 
