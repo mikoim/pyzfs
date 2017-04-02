@@ -7,16 +7,10 @@ These are mostly functional and conformance tests that validate
 that the operations produce expected effects or fail with expected
 exceptions.
 """
-from __future__ import print_function
 from __future__ import division
+from __future__ import print_function
 from __future__ import unicode_literals
 
-from builtins import bytes
-from builtins import zip
-from builtins import range
-from builtins import object
-from past.utils import old_div
-import unittest
 import contextlib
 import errno
 import filecmp
@@ -28,7 +22,15 @@ import stat
 import subprocess
 import tempfile
 import time
+import unittest
 import uuid
+
+from builtins import object
+from builtins import range
+from builtins import str
+from builtins import zip
+from past.utils import old_div
+
 from .. import _libzfs_core as lzc
 from .. import exceptions as lzc_exc
 
@@ -3451,7 +3453,7 @@ class _TempPool(object):
     def __init__(self, size=128 * 1024 * 1024, readonly=False, filesystems=[]):
         self._filesystems = filesystems
         self._readonly = readonly
-        self._pool_name = 'pool.' + bytes(uuid.uuid4())
+        self._pool_name = 'pool.' + str(uuid.uuid4())
         self._root = _Filesystem(self._pool_name)
         (fd, self._pool_file_path) = tempfile.mkstemp(
             suffix='.zpool', prefix='tmp-')
@@ -3610,20 +3612,20 @@ class _Filesystem(object):
 
     def getFilesystem(self):
         self._fs_id += 1
-        fsname = self._name + '/fs' + bytes(self._fs_id)
+        fsname = self._name + '/fs' + str(self._fs_id)
         fs = _Filesystem(fsname)
         self._children.append(fs)
         return fs
 
     def _makeSnapName(self, i):
-        return self._name + '@snap' + bytes(i)
+        return self._name + '@snap' + str(i)
 
     def getSnap(self):
         self._snap_id += 1
         return self._makeSnapName(self._snap_id)
 
     def _makeBookmarkName(self, i):
-        return self._name + '#bmark' + bytes(i)
+        return self._name + '#bmark' + str(i)
 
     def getBookmark(self):
         self._bmark_id += 1

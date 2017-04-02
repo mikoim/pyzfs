@@ -14,20 +14,30 @@ rather than by integer error codes.
 """
 from __future__ import unicode_literals
 
-from builtins import next
-from builtins import object
 import errno
-import functools
 import fcntl
+import functools
 import os
 import struct
 import threading
-from . import exceptions
+
+from builtins import next
+from builtins import object
+from builtins import str
+
 from . import _error_translation as errors
-from .bindings import libzfs_core
+from . import exceptions
 from ._constants import MAXNAMELEN
-from .ctypes import int32_t
 from ._nvlist import nvlist_in, nvlist_out
+from .bindings import libzfs_core
+from .ctypes import int32_t
+
+
+def _b(s):
+    if isinstance(s, str):
+        return s.encode()
+    else:
+        return s
 
 
 def lzc_create(name, ds_type='zfs', props=None):
@@ -57,7 +67,7 @@ def lzc_create(name, ds_type='zfs', props=None):
     else:
         raise exceptions.DatasetTypeInvalid(ds_type)
     nvlist = nvlist_in(props)
-    ret = _lib.lzc_create(name, ds_type, nvlist)
+    ret = _lib.lzc_create(_b(name), ds_type, nvlist)
     errors.lzc_create_translate_error(ret, name, ds_type, props)
 
 
@@ -91,7 +101,7 @@ def lzc_clone(name, origin, props=None):
     if props is None:
         props = {}
     nvlist = nvlist_in(props)
-    ret = _lib.lzc_clone(name, origin, nvlist)
+    ret = _lib.lzc_clone(_b(name), _b(origin), nvlist)
     errors.lzc_clone_translate_error(ret, name, origin, props)
 
 
@@ -110,7 +120,7 @@ def lzc_rollback(name):
     '''
     # Account for terminating NUL in C strings.
     snapnamep = _ffi.new('char[]', MAXNAMELEN + 1)
-    ret = _lib.lzc_rollback(name, snapnamep, MAXNAMELEN + 1)
+    ret = _lib.lzc_rollback(_b(name), snapnamep, MAXNAMELEN + 1)
     errors.lzc_rollback_translate_error(ret, name)
     return _ffi.string(snapnamep)
 
@@ -273,7 +283,7 @@ def lzc_get_bookmarks(fsname, props=None):
     props_dict = {name: None for name in props}
     nvlist = nvlist_in(props_dict)
     with nvlist_out(bmarks) as bmarks_nvlist:
-        ret = _lib.lzc_get_bookmarks(fsname, nvlist, bmarks_nvlist)
+        ret = _lib.lzc_get_bookmarks(_b(fsname), nvlist, bmarks_nvlist)
     errors.lzc_get_bookmarks_translate_error(ret, fsname, props)
     return bmarks
 
@@ -333,7 +343,7 @@ def lzc_snaprange_space(firstsnap, lastsnap):
     In that case ``lzc_snaprange_space`` calculates space used by the snapshot.
     '''
     valp = _ffi.new('uint64_t *')
-    ret = _lib.lzc_snaprange_space(firstsnap, lastsnap, valp)
+    ret = _lib.lzc_snaprange_space(_b(firstsnap), _b(lastsnap), valp)
     errors.lzc_snaprange_space_translate_error(ret, firstsnap, lastsnap)
     return int(valp[0])
 
@@ -439,7 +449,7 @@ def lzc_get_holds(snapname):
     '''
     holds = {}
     with nvlist_out(holds) as nvlist:
-        ret = _lib.lzc_get_holds(snapname, nvlist)
+        ret = _lib.lzc_get_holds(_b(snapname), nvlist)
     errors.lzc_get_holds_translate_error(ret, snapname)
     return holds
 
@@ -517,7 +527,7 @@ def lzc_send(snapname, fromsnap, fd, flags=None):
             raise exceptions.UnknownStreamFeature(flag)
         c_flags |= c_flag
 
-    ret = _lib.lzc_send(snapname, c_fromsnap, fd, c_flags)
+    ret = _lib.lzc_send(_b(snapname), _b(c_fromsnap), fd, c_flags)
     errors.lzc_send_translate_error(ret, snapname, fromsnap, fd, flags)
 
 
@@ -549,7 +559,7 @@ def lzc_send_space(snapname, fromsnap=None):
     else:
         c_fromsnap = _ffi.NULL
     valp = _ffi.new('uint64_t *')
-    ret = _lib.lzc_send_space(snapname, c_fromsnap, valp)
+    ret = _lib.lzc_send_space(_b(snapname), _b(c_fromsnap), valp)
     errors.lzc_send_space_translate_error(ret, snapname, fromsnap)
     return int(valp[0])
 
@@ -648,7 +658,7 @@ def lzc_receive(snapname, fd, force=False, origin=None, props=None):
     if props is None:
         props = {}
     nvlist = nvlist_in(props)
-    ret = _lib.lzc_receive(snapname, nvlist, c_origin, force, fd)
+    ret = _lib.lzc_receive(_b(snapname), nvlist, _b(c_origin), force, fd)
     errors.lzc_receive_translate_error(ret, snapname, fd, force, origin, props)
 
 
@@ -667,7 +677,7 @@ def lzc_exists(name):
     .. note::
         ``lzc_exists`` can not be used to check for existence of bookmarks.
     '''
-    ret = _lib.lzc_exists(name)
+    ret = _lib.lzc_exists(_b(name))
     return bool(ret)
 
 

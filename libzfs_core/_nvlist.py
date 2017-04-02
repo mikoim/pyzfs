@@ -32,10 +32,13 @@ Format:
 """
 from __future__ import unicode_literals
 
-from builtins import range
 import numbers
 from collections import namedtuple
 from contextlib import contextmanager
+
+from builtins import range
+from builtins import str
+
 from .bindings import libnvpair
 from .ctypes import _type_to_suffix
 
@@ -176,6 +179,11 @@ def _nvlist_add_array(nvlist, key, array):
         for string in array:
             c_array.append(_ffi.new('char[]', string))
         ret = _lib.nvlist_add_string_array(nvlist, key, c_array, len(c_array))
+    elif isinstance(specimen, str):
+        c_array = []
+        for string in array:
+            c_array.append(_ffi.new('char[]', string.encode()))
+        ret = _lib.nvlist_add_string_array(nvlist, key, c_array, len(c_array))
     elif isinstance(specimen, bool):
         ret = _lib.nvlist_add_boolean_array(nvlist, key, array, len(array))
     elif isinstance(specimen, numbers.Integral):
@@ -231,8 +239,10 @@ def _nvlist_to_dict(nvlist, props):
 
 def _dict_to_nvlist(props, nvlist):
     for k, v in list(props.items()):
-        if not isinstance(k, bytes):
+        if not (isinstance(k, bytes) or isinstance(k, str)):
             raise TypeError('Unsupported key type ' + type(k).__name__)
+        if isinstance(k, str):
+            k = k.encode()
         ret = 0
         if isinstance(v, dict):
             ret = _lib.nvlist_add_nvlist(nvlist, k, nvlist_in(v))
@@ -240,6 +250,8 @@ def _dict_to_nvlist(props, nvlist):
             _nvlist_add_array(nvlist, k, v)
         elif isinstance(v, bytes):
             ret = _lib.nvlist_add_string(nvlist, k, v)
+        elif isinstance(v, str):
+            ret = _lib.nvlist_add_string(nvlist, k, v.encode())
         elif isinstance(v, bool):
             ret = _lib.nvlist_add_boolean_value(nvlist, k, v)
         elif v is None:
