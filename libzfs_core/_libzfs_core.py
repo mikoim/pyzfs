@@ -754,8 +754,8 @@ def lzc_rename(source, target):
     '''
     Rename the ZFS dataset.
 
-    :param source name: the current name of the dataset to rename.
-    :param target name: the new name of the dataset.
+    :param bytes source: the current name of the dataset to rename.
+    :param bytes target: the new name of the dataset.
     :raises NameInvalid: if either the source or target name is invalid.
     :raises NameTooLong: if either the source or target name is too long.
     :raises NameTooLong: if a snapshot of the source would get a too long
