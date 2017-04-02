@@ -3,7 +3,6 @@
 """
 Utility functions for casting to a specific C type.
 """
-from __future__ import unicode_literals
 
 from .bindings.libnvpair import ffi as _ffi
 
@@ -22,7 +21,7 @@ def _ffi_cast(type_name):
         else:
             _ffi.new(type_name + '*', value)
         return _ffi.cast(type_name, value)
-    _func.__name__ = type_name.encode()
+    _func.__name__ = type_name
     return _func
 
 
