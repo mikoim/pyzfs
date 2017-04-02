@@ -22,7 +22,7 @@ def _ffi_cast(type_name):
         else:
             _ffi.new(type_name + '*', value)
         return _ffi.cast(type_name, value)
-    _func.__name__ = type_name
+    _func.__name__ = type_name.encode()
     return _func
 
 
